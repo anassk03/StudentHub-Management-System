@@ -1,0 +1,204 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Semester Results | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1">Semester Results</h3>
+        <p class="text-muted mb-0">View student marks, grades, percentage and SGPA.</p>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+
+            <form method="GET" class="row g-3 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Student</label>
+                    <select name="student" class="form-select">
+                        <option value="">All Students</option>
+
+                        {% for student in students %}
+                        <option value="{{ student.student_id }}"
+                            {% if selected_student == student.student_id %}selected{% endif %}>
+                            {{ student.student_id }} - {{ student.full_name }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Semester</label>
+                    <select name="semester" class="form-select">
+                        <option value="">All Semesters</option>
+
+                        {% for number in "12345678" %}
+                        <option value="{{ number }}"
+                            {% if selected_semester == number %}selected{% endif %}>
+                            Semester {{ number }}
+                        </option>
+                        {% endfor %}
+
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Academic Year</label>
+                    <input type="text"
+                           name="academic_year"
+                           class="form-control"
+                           placeholder="Example: 2026-2027"
+                           value="{{ selected_year }}">
+                </div>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a href="{% url 'semester_results' %}" class="btn btn-light border">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </a>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+    <!-- RESULT SUMMARY -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Subjects</div>
+                    <h3 class="fw-bold mb-0">{{ total_subjects }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Percentage</div>
+                    <h3 class="fw-bold mb-0">{{ percentage }}%</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">SGPA</div>
+                    <h3 class="fw-bold text-primary mb-0">{{ sgpa }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">Total Credits</div>
+                    <h3 class="fw-bold mb-0">{{ total_credits }}</h3>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- PASS FAIL SUMMARY -->
+    <div class="d-flex gap-3 flex-wrap mb-4">
+        <span class="badge bg-success fs-6 p-2">
+            Passed Subjects: {{ passed_subjects }}
+        </span>
+
+        <span class="badge bg-danger fs-6 p-2">
+            Failed Subjects: {{ failed_subjects }}
+        </span>
+    </div>
+
+    <!-- SUBJECT RESULTS -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">Subject-wise Results</h5>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Semester</th>
+                            <th>Internal / 30</th>
+                            <th>External / 70</th>
+                            <th>Total / 100</th>
+                            <th>Credits</th>
+                            <th>Grade</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for mark in marks_records %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ mark.student.full_name }}</div>
+                                <small class="text-muted">{{ mark.student.student_id }}</small>
+                            </td>
+
+                            <td>{{ mark.subject_code }}</td>
+                            <td>{{ mark.subject_name }}</td>
+                            <td>{{ mark.semester }}</td>
+                            <td>{{ mark.internal_marks }}</td>
+                            <td>{{ mark.external_marks }}</td>
+                            <td class="fw-bold">{{ mark.total_marks }}</td>
+                            <td>{{ mark.credits }}</td>
+                            <td><span class="badge bg-primary">{{ mark.grade }}</span></td>
+
+                            <td>
+                                {% if mark.result == 'Pass' %}
+                                    <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Fail</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="10" class="text-center py-5 text-muted">
+                                No semester results found.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="mt-3">
+        <a href="{% url 'marks_dashboard' %}" class="btn btn-light border">
+            <i class="bi bi-arrow-left me-1"></i> Back to Marks Dashboard
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

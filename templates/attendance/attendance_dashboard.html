@@ -1,0 +1,254 @@
+
+{% extends 'students/base.html' %}
+
+{% block content %}
+
+<div class="page-header d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2>Attendance Management</h2>
+        <p class="text-muted">
+            Monitor daily student attendance and attendance statistics.
+        </p>
+    </div>
+
+    <a href="{% url 'mark_attendance' %}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i> Mark Attendance
+    </a>
+</div>
+
+<!-- DATE FILTER -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <form method="GET" class="row align-items-end g-3">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold">
+                    Select Attendance Date
+                </label>
+
+                <input
+                    type="date"
+                    name="date"
+                    class="form-control"
+                    value="{{ selected_date|date:'Y-m-d' }}"
+                >
+            </div>
+
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter me-2"></i> Apply Filter
+                </button>
+
+                <a href="{% url 'attendance_dashboard' %}"
+                   class="btn btn-light">
+                    Reset
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ATTENDANCE STATISTICS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-2">Total Students</p>
+                <h3 class="fw-bold">{{ total_students }}</h3>
+                <small class="text-muted">Registered students</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-2">Present</p>
+                <h3 class="fw-bold text-success">{{ present_count }}</h3>
+                <small class="text-muted">Students present</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-2">Absent</p>
+                <h3 class="fw-bold text-danger">{{ absent_count }}</h3>
+                <small class="text-muted">Students absent</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <p class="text-muted mb-2">Late</p>
+                <h3 class="fw-bold text-warning">{{ late_count }}</h3>
+                <small class="text-muted">Students late</small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- ADDITIONAL STATISTICS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Attendance Percentage</h6>
+
+                <h2 class="fw-bold text-primary">
+                    {{ attendance_percentage }}%
+                </h2>
+
+                <div class="progress mt-3" style="height: 9px;">
+                    <div
+                        class="progress-bar bg-primary"
+                        role="progressbar"
+                        aria-label="Attendance percentage"
+                        aria-valuenow="{{ attendance_percentage }}"
+                        aria-valuemin="0"
+                        aria-valuemax="100"
+                        data-percentage="{{ attendance_percentage }}"
+                    ></div>
+                </div>
+
+                <small class="text-muted mt-2 d-block">
+                    Present students out of all registered students
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Attendance Marked</h6>
+                <h2 class="fw-bold">{{ marked_count }}</h2>
+                <small class="text-muted">
+                    Students with recorded attendance
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-body">
+                <h6 class="text-muted">Not Marked</h6>
+                <h2 class="fw-bold text-warning">{{ not_marked_count }}</h2>
+                <small class="text-muted">
+                    Students whose attendance is not recorded
+                </small>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- DAILY ATTENDANCE TABLE -->
+<div class="card border-0 shadow-sm">
+
+    <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+        <div>
+            <h5 class="mb-0">Daily Attendance Records</h5>
+            <small class="text-muted">
+                {{ selected_date|date:"d M Y" }}
+            </small>
+        </div>
+
+        <a href="{% url 'attendance_list' %}"
+           class="btn btn-outline-primary btn-sm">
+            View All Records
+        </a>
+    </div>
+
+    <div class="card-body p-0">
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle mb-0">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Student ID</th>
+                        <th>Student Name</th>
+                        <th>Department</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    {% for record in recent_attendance %}
+
+                    <tr>
+                        <td>{{ record.student.student_id }}</td>
+
+                        <td class="fw-semibold">
+                            {{ record.student.full_name }}
+                        </td>
+
+                        <td>{{ record.student.department }}</td>
+
+                        <td>
+                            {% if record.status == 'Present' %}
+                                <span class="badge bg-success">Present</span>
+                            {% elif record.status == 'Absent' %}
+                                <span class="badge bg-danger">Absent</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark">Late</span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ record.remarks|default:"-" }}
+                        </td>
+
+                        <td>
+                            <a
+                                href="{% url 'student_attendance' record.student.pk %}"
+                                class="btn btn-sm btn-outline-primary"
+                            >
+                                View History
+                            </a>
+                        </td>
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+                        <td colspan="6" class="text-center py-5">
+
+                            <i class="fas fa-calendar-check fa-2x text-muted mb-3"></i>
+
+                            <h6>No attendance records found</h6>
+
+                            <p class="text-muted mb-3">
+                                No attendance has been marked for this date.
+                            </p>
+
+                            <a
+                                href="{% url 'mark_attendance' %}"
+                                class="btn btn-primary btn-sm"
+                            >
+                                Mark Attendance
+                            </a>
+
+                        </td>
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

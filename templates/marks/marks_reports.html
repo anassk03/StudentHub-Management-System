@@ -1,0 +1,255 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Marks Reports | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Marks Reports</h3>
+            <p class="text-muted mb-0">View and manage student academic marks reports.</p>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'export_marks_report' %}?student={{ selected_student|urlencode }}&semester={{ selected_semester|urlencode }}&year={{ selected_year|urlencode }}"
+               class="btn btn-success">
+                <i class="bi bi-file-earmark-spreadsheet me-1"></i>
+                Download CSV
+            </a>
+
+            <button onclick="window.print()" class="btn btn-primary">
+                <i class="bi bi-printer me-1"></i>
+                Print Report
+            </button>
+        </div>
+    </div>
+
+    <!-- FILTER SECTION -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white py-3">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-funnel text-primary me-2"></i>
+                Filter Marks Reports
+            </h5>
+        </div>
+
+        <div class="card-body">
+            <form method="GET" class="row g-3 align-items-end">
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Select Student</label>
+                    <select name="student" class="form-select">
+                        <option value="">All Students</option>
+
+                        {% for student in students %}
+                            <option value="{{ student.student_id }}"
+                                {% if selected_student == student.student_id %}selected{% endif %}>
+                                {{ student.full_name }} ({{ student.student_id }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Semester</label>
+                    <select name="semester" class="form-select">
+                        <option value="">All Semesters</option>
+
+                        {% for number in "12345678" %}
+                            <option value="{{ number }}"
+                                {% if selected_semester == number %}selected{% endif %}>
+                                Semester {{ number }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">Academic Year</label>
+                    <input type="text"
+                           name="year"
+                           class="form-control"
+                           placeholder="Example: 2026-2027"
+                           value="{{ selected_year }}">
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-1"></i>
+                        Filter
+                    </button>
+                </div>
+
+                <div class="col-12">
+                    <a href="{% url 'marks_reports' %}" class="btn btn-light border btn-sm">
+                        <i class="bi bi-arrow-counterclockwise me-1"></i>
+                        Reset Filters
+                    </a>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-journal-text text-primary fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1">Total Records</p>
+                            <h3 class="fw-bold mb-0">{{ total_records }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1">Passed Records</p>
+                            <h3 class="fw-bold mb-0 text-success">{{ passed_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-danger bg-opacity-10 p-3">
+                            <i class="bi bi-x-circle text-danger fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-1">Failed Records</p>
+                            <h3 class="fw-bold mb-0 text-danger">{{ failed_count }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MARKS REPORT TABLE -->
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <h5 class="fw-bold mb-0">
+                <i class="bi bi-table text-primary me-2"></i>
+                Student Marks Records
+            </h5>
+
+            <span class="badge bg-primary">{{ total_records }} Records</span>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">S.No</th>
+                            <th>Student</th>
+                            <th>Subject Code</th>
+                            <th>Subject Name</th>
+                            <th>Semester</th>
+                            <th>Academic Year</th>
+                            <th>Internal</th>
+                            <th>External</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th>Result</th>
+                            <th>Marksheet</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for mark in marks_records %}
+                            <tr>
+                                <td class="ps-3">{{ forloop.counter }}</td>
+
+                                <td>
+                                    <div class="fw-semibold">{{ mark.student.full_name }}</div>
+                                    <small class="text-muted">{{ mark.student.student_id }}</small>
+                                </td>
+
+                                <td>{{ mark.subject_code }}</td>
+                                <td>{{ mark.subject_name }}</td>
+                                <td>Semester {{ mark.semester }}</td>
+                                <td>{{ mark.academic_year }}</td>
+                                <td>{{ mark.internal_marks }}/30</td>
+                                <td>{{ mark.external_marks }}/70</td>
+                                <td class="fw-bold">{{ mark.total_marks }}/100</td>
+
+                                <td>
+                                    <span class="badge bg-primary">{{ mark.grade }}</span>
+                                </td>
+
+                                <td>
+                                    {% if mark.result == 'Pass' %}
+                                        <span class="badge bg-success">Pass</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Fail</span>
+                                    {% endif %}
+                                </td>
+
+                                <td>
+                                    <a href="{% url 'student_marksheet' mark.student.pk %}"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <i class="bi bi-eye me-1"></i>
+                                        View
+                                    </a>
+                                </td>
+                            </tr>
+
+                        {% empty %}
+                            <tr>
+                                <td colspan="12" class="text-center py-5">
+                                    <i class="bi bi-clipboard-x fs-1 text-muted d-block mb-3"></i>
+                                    <h6 class="fw-semibold">No Marks Records Found</h6>
+                                    <p class="text-muted mb-3">
+                                        No student marks match your selected filters.
+                                    </p>
+                                    <a href="{% url 'add_student_marks' %}"
+                                       class="btn btn-primary btn-sm">
+                                        <i class="bi bi-plus-circle me-1"></i>
+                                        Add Student Marks
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <div class="mt-3">
+        <a href="{% url 'marks_dashboard' %}" class="btn btn-light border">
+            <i class="bi bi-arrow-left me-1"></i>
+            Back to Marks Dashboard
+        </a>
+    </div>
+
+</div>
+
+{% endblock %}

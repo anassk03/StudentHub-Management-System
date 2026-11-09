@@ -1,0 +1,180 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Marks Dashboard | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Student Marks Dashboard</h3>
+            <p class="text-muted mb-0">Monitor B.Tech student academic performance.</p>
+        </div>
+
+        <a href="{% url 'add_student_marks' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Add Student Marks
+        </a>
+    </div>
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Total Marks Records</div>
+                    <h3 class="fw-bold mb-0">{{ total_records }}</h3>
+                    <i class="bi bi-journal-text text-primary fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Passed Records</div>
+                    <h3 class="fw-bold text-success mb-0">{{ passed_count }}</h3>
+                    <i class="bi bi-check-circle text-success fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Failed Records</div>
+                    <h3 class="fw-bold text-danger mb-0">{{ failed_count }}</h3>
+                    <i class="bi bi-x-circle text-danger fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small mb-2">Average Marks</div>
+                    <h3 class="fw-bold mb-0">{{ average_marks }}%</h3>
+                    <i class="bi bi-graph-up text-info fs-3"></i>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- QUICK LINKS -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="fw-bold mb-3">Marks Management</h5>
+
+            <div class="row g-3">
+
+                <div class="col-md-3">
+                    <a href="{% url 'add_student_marks' %}" class="btn btn-outline-primary w-100 py-3">
+                        <i class="bi bi-plus-circle me-2"></i>Add Marks
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a href="{% url 'semester_results' %}" class="btn btn-outline-success w-100 py-3">
+                        <i class="bi bi-award me-2"></i>Semester Results
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a href="{% url 'performance_analysis' %}" class="btn btn-outline-info w-100 py-3">
+                        <i class="bi bi-bar-chart me-2"></i>Performance
+                    </a>
+                </div>
+
+                <div class="col-md-3">
+                    <a href="{% url 'marks_reports' %}" class="btn btn-outline-dark w-100 py-3">
+                        <i class="bi bi-file-earmark-text me-2"></i>Marks Reports
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- RECENT MARKS -->
+    <div class="card border-0 shadow-sm">
+
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+            <h5 class="fw-bold mb-0">Recent Marks Records</h5>
+            <a href="{% url 'marks_reports' %}" class="text-decoration-none">View All</a>
+        </div>
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+                        <tr>
+                            <th>Student</th>
+                            <th>Subject</th>
+                            <th>Semester</th>
+                            <th>Internal</th>
+                            <th>External</th>
+                            <th>Total</th>
+                            <th>Grade</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for mark in recent_marks %}
+                        <tr>
+                            <td>
+                                <div class="fw-semibold">{{ mark.student.full_name }}</div>
+                                <small class="text-muted">{{ mark.student.student_id }}</small>
+                            </td>
+
+                            <td>
+                                <div class="fw-semibold">{{ mark.subject_name }}</div>
+                                <small class="text-muted">{{ mark.subject_code }}</small>
+                            </td>
+
+                            <td>{{ mark.semester }}</td>
+                            <td>{{ mark.internal_marks }}</td>
+                            <td>{{ mark.external_marks }}</td>
+                            <td class="fw-bold">{{ mark.total_marks }}</td>
+                            <td><span class="badge bg-primary">{{ mark.grade }}</span></td>
+
+                            <td>
+                                {% if mark.result == 'Pass' %}
+                                    <span class="badge bg-success">Pass</span>
+                                {% else %}
+                                    <span class="badge bg-danger">Fail</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center py-5 text-muted">
+                                <i class="bi bi-journal-x fs-2 d-block mb-2"></i>
+                                No marks records available yet.
+                                <div class="mt-2">
+                                    <a href="{% url 'add_student_marks' %}" class="btn btn-sm btn-primary">
+                                        Add First Marks Record
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

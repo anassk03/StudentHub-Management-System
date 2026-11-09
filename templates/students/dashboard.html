@@ -1,0 +1,140 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Dashboard | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <h2>Dashboard</h2>
+        <p>Here's what's happening in your student management system.</p>
+    </div>
+
+    <a href="{% url 'add_student' %}" class="btn-primary-custom">
+        <i class="fas fa-plus"></i> Add New Student
+    </a>
+</div>
+
+<!-- STATISTICS CARDS -->
+<div class="row g-3 mb-4">
+
+    <div class="col-xl-3 col-md-6">
+        <div class="custom-card stat-card">
+            <div>
+                <p>Total Students</p>
+                <h3>{{ total_students }}</h3>
+                <small class="text-muted">Registered students</small>
+            </div>
+            <div class="stat-icon icon-blue">
+                <i class="fas fa-users"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="custom-card stat-card">
+            <div>
+                <p>Male Students</p>
+                <h3>{{ male_students }}</h3>
+                <small class="text-muted">Male registrations</small>
+            </div>
+            <div class="stat-icon icon-green">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="custom-card stat-card">
+            <div>
+                <p>Female Students</p>
+                <h3>{{ female_students }}</h3>
+                <small class="text-muted">Female registrations</small>
+            </div>
+            <div class="stat-icon icon-orange">
+                <i class="fas fa-user-graduate"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6">
+        <div class="custom-card stat-card">
+            <div>
+                <p>Departments</p>
+                <h3>{{ total_departments }}</h3>
+                <small class="text-muted">Active departments</small>
+            </div>
+            <div class="stat-icon icon-purple">
+                <i class="fas fa-building"></i>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- RECENT STUDENTS -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h5 class="fw-bold mb-1">Recently Registered Students</h5>
+        <p class="text-muted small mb-0">Latest student registrations</p>
+    </div>
+
+    <a href="{% url 'student_list' %}" class="text-decoration-none small fw-bold">
+        View All <i class="fas fa-arrow-right ms-1"></i>
+    </a>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Student Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in recent_students %}
+                <tr>
+                    <td>
+                        <span class="fw-bold text-primary">
+                            {{ student.student_id }}
+                        </span>
+                    </td>
+
+                    <td class="fw-semibold">{{ student.full_name }}</td>
+                    <td>{{ student.email }}</td>
+                    <td>{{ student.department }}</td>
+                    <td>{{ student.year }}</td>
+
+                    <td>
+                        <a href="{% url 'student_detail' student.pk %}"
+                           class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye"></i> View
+                        </a>
+                    </td>
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center py-5">
+                        <i class="fas fa-users fa-2x text-muted mb-3"></i>
+                        <p class="text-muted mb-2">No students registered yet.</p>
+                        <a href="{% url 'add_student' %}" class="btn-primary-custom">
+                            Add Your First Student
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

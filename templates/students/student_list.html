@@ -1,0 +1,161 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}All Students | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <h2>All Students</h2>
+        <p>View, search and manage all registered students.</p>
+    </div>
+
+    <a href="{% url 'add_student' %}" class="btn-primary-custom">
+        <i class="fas fa-user-plus"></i> Add Student
+    </a>
+</div>
+
+<!-- SEARCH SECTION -->
+<div class="custom-card">
+    <form method="GET" action="{% url 'student_list' %}">
+        <div class="row g-2 align-items-center">
+
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-white">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+
+                    <input
+                        type="text"
+                        name="q"
+                        class="form-control"
+                        placeholder="Search by student ID, name, email, department or course..."
+                        value="{{ query }}"
+                    >
+                </div>
+            </div>
+
+            <div class="col-md-3 d-flex gap-2">
+                <button type="submit" class="btn-primary-custom">
+                    Search
+                </button>
+
+                <a href="{% url 'student_list' %}"
+                   class="btn btn-outline-secondary">
+                    Reset
+                </a>
+            </div>
+
+        </div>
+    </form>
+</div>
+
+<!-- STUDENT TABLE -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-bold mb-0">Student Records</h5>
+
+    <span class="badge bg-primary rounded-pill px-3 py-2">
+        {{ students|length }} Students
+    </span>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for student in students %}
+
+                <tr>
+                    <td>
+                        <span class="fw-bold text-primary">
+                            {{ student.student_id }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="fw-semibold">
+                            {{ student.full_name }}
+                        </div>
+                    </td>
+
+                    <td>{{ student.email }}</td>
+
+                    <td>{{ student.phone }}</td>
+
+                    <td>{{ student.department }}</td>
+
+                    <td>
+                        <span class="badge bg-light text-dark">
+                            {{ student.year }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <div class="d-flex gap-1">
+
+                            <a href="{% url 'student_detail' student.pk %}"
+                               class="btn btn-sm btn-outline-primary"
+                               title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+
+                            <a href="{% url 'edit_student' student.pk %}"
+                               class="btn btn-sm btn-outline-success"
+                               title="Edit">
+                                <i class="fas fa-pen"></i>
+                            </a>
+
+                            <a href="{% url 'delete_student' student.pk %}"
+                               class="btn btn-sm btn-outline-danger"
+                               title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </a>
+
+                        </div>
+                    </td>
+                </tr>
+
+                {% empty %}
+
+                <tr>
+                    <td colspan="7" class="text-center py-5">
+                        <i class="fas fa-folder-open fa-2x text-muted mb-3"></i>
+
+                        <h6 class="fw-bold">No Students Found</h6>
+
+                        <p class="text-muted small">
+                            Try another search or add a new student.
+                        </p>
+
+                        <a href="{% url 'add_student' %}"
+                           class="btn-primary-custom">
+                            <i class="fas fa-plus"></i> Add Student
+                        </a>
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+{% endblock %}

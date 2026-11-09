@@ -1,0 +1,78 @@
+
+{% extends 'students/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<div class="page-header mb-4">
+    <h2>Mark Attendance</h2>
+    <p class="text-muted">
+        Record daily attendance for individual students.
+    </p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card border-0 shadow-sm">
+
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0">
+                    <i class="fas fa-calendar-check me-2 text-primary"></i>
+                    Attendance Details
+                </h5>
+            </div>
+
+            <div class="card-body p-4">
+
+                <form method="POST">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        {{ form.student|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.date|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.status|as_crispy_field }}
+                    </div>
+
+                    <div class="mb-4">
+                        {{ form.remarks|as_crispy_field }}
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-2"></i>
+                            Save Attendance
+                        </button>
+
+                        <a href="{% url 'attendance_dashboard' %}"
+                           class="btn btn-light">
+                            Cancel
+                        </a>
+                    </div>
+
+                </form>
+
+            </div>
+        </div>
+
+        <div class="alert alert-info mt-4">
+            <i class="fas fa-info-circle me-2"></i>
+            Attendance can be recorded only once per student per day.
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

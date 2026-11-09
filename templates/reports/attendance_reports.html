@@ -1,0 +1,435 @@
+```django
+{% extends 'students/base.html' %}
+
+{% block title %}Attendance Reports | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+
+        <div>
+            <h3 class="fw-bold mb-1">Attendance Reports</h3>
+            <p class="text-muted mb-0">
+                View and analyse student attendance records.
+            </p>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2">
+
+            <a href="{% url 'export_attendance_report' %}?start_date={{ start_date|urlencode }}&end_date={{ end_date|urlencode }}"
+               class="btn btn-success">
+
+                <i class="fas fa-file-csv me-2"></i>
+                Download CSV
+
+            </a>
+
+            <button type="button"
+                    onclick="window.print()"
+                    class="btn btn-primary">
+
+                <i class="fas fa-print me-2"></i>
+                Print Report
+
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- SUMMARY CARDS -->
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <p class="text-muted mb-2">Total Records</p>
+
+                    <h3 class="fw-bold text-primary">
+                        {{ total_records }}
+                    </h3>
+
+                    <i class="fas fa-clipboard-list text-primary fa-lg"></i>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <p class="text-muted mb-2">Present</p>
+
+                    <h3 class="fw-bold text-success">
+                        {{ present_count }}
+                    </h3>
+
+                    <i class="fas fa-check-circle text-success fa-lg"></i>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <p class="text-muted mb-2">Absent</p>
+
+                    <h3 class="fw-bold text-danger">
+                        {{ absent_count }}
+                    </h3>
+
+                    <i class="fas fa-times-circle text-danger fa-lg"></i>
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div class="col-md-6 col-xl-3">
+
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+
+                    <p class="text-muted mb-2">Late</p>
+
+                    <h3 class="fw-bold text-warning">
+                        {{ late_count }}
+                    </h3>
+
+                    <i class="fas fa-clock text-warning fa-lg"></i>
+
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ATTENDANCE PERCENTAGE -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-body p-4">
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+
+                <h5 class="fw-bold mb-0">
+                    Overall Present Rate
+                </h5>
+
+                <h5 class="fw-bold text-primary mb-0">
+                    {{ attendance_percentage }}%
+                </h5>
+
+            </div>
+
+            <div class="progress" style="height: 12px;">
+
+                <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    data-percentage="{{ attendance_percentage }}"
+                    aria-valuenow="{{ attendance_percentage }}"
+                    aria-valuemin="0"
+                    aria-valuemax="100">
+                </div>
+
+            </div>
+
+            <small class="text-muted mt-2 d-block">
+                Percentage of attendance records marked Present.
+            </small>
+
+        </div>
+
+    </div>
+
+
+    <!-- DATE FILTER -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 p-4 pb-0">
+
+            <h5 class="fw-bold mb-1">
+                <i class="fas fa-filter me-2 text-primary"></i>
+                Filter Attendance
+            </h5>
+
+            <p class="text-muted small mb-0">
+                Select a date range to view attendance records.
+            </p>
+
+        </div>
+
+
+        <div class="card-body p-4">
+
+            <form method="GET">
+
+                <div class="row g-3 align-items-end">
+
+                    <!-- START DATE -->
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-semibold">
+                            Start Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="start_date"
+                            class="form-control"
+                            value="{{ start_date }}">
+
+                    </div>
+
+
+                    <!-- END DATE -->
+                    <div class="col-md-4">
+
+                        <label class="form-label fw-semibold">
+                            End Date
+                        </label>
+
+                        <input
+                            type="date"
+                            name="end_date"
+                            class="form-control"
+                            value="{{ end_date }}">
+
+                    </div>
+
+
+                    <!-- BUTTONS -->
+                    <div class="col-md-4 d-flex flex-wrap gap-2">
+
+                        <button type="submit" class="btn btn-primary">
+
+                            <i class="fas fa-search me-1"></i>
+                            Apply Filter
+
+                        </button>
+
+                        <a href="{% url 'attendance_reports' %}"
+                           class="btn btn-light border">
+
+                            <i class="fas fa-rotate-left me-1"></i>
+                            Reset
+
+                        </a>
+
+                    </div>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <!-- ATTENDANCE TABLE -->
+    <div class="card border-0 shadow-sm mb-4">
+
+        <div class="card-header bg-white border-0 p-4">
+
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                <div>
+
+                    <h5 class="fw-bold mb-1">
+                        <i class="fas fa-calendar-check text-primary me-2"></i>
+                        Attendance Records
+                    </h5>
+
+                    <small class="text-muted">
+                        Student-wise attendance information
+                    </small>
+
+                </div>
+
+                <span class="badge bg-primary-subtle text-primary px-3 py-2">
+                    {{ total_records }} Records
+                </span>
+
+            </div>
+
+        </div>
+
+
+        <div class="card-body p-0">
+
+            <div class="table-responsive">
+
+                <table class="table table-hover align-middle mb-0">
+
+                    <thead class="table-light">
+
+                        <tr>
+                            <th class="px-4">S.No</th>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Department</th>
+                            <th>Date</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        {% for record in attendance_records %}
+
+                            <tr>
+
+                                <td class="px-4">
+                                    {{ forloop.counter }}
+                                </td>
+
+                                <td>
+                                    <span class="fw-semibold text-primary">
+                                        {{ record.student.student_id }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="fw-semibold">
+                                        {{ record.student.full_name }}
+                                    </div>
+                                </td>
+
+                                <td>
+                                    {{ record.student.department }}
+                                </td>
+
+                                <td>
+                                    {{ record.date|date:"d M Y" }}
+                                </td>
+
+                                <td>
+
+                                    {% if record.status == 'Present' %}
+
+                                        <span class="badge bg-success">
+                                            Present
+                                        </span>
+
+                                    {% elif record.status == 'Absent' %}
+
+                                        <span class="badge bg-danger">
+                                            Absent
+                                        </span>
+
+                                    {% else %}
+
+                                        <span class="badge bg-warning text-dark">
+                                            Late
+                                        </span>
+
+                                    {% endif %}
+
+                                </td>
+
+                                <td>
+                                    {{ record.remarks|default:"-" }}
+                                </td>
+
+                            </tr>
+
+                        {% empty %}
+
+                            <tr>
+
+                                <td colspan="7" class="text-center py-5">
+
+                                    <i class="fas fa-clipboard-list fa-2x text-muted mb-3"></i>
+
+                                    <h6 class="fw-bold">
+                                        No Attendance Records Found
+                                    </h6>
+
+                                    <p class="text-muted mb-0">
+                                        Try changing your date filters.
+                                    </p>
+
+                                </td>
+
+                            </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- PRINT STYLING -->
+<style>
+
+@media print {
+
+    .sidebar,
+    .topbar,
+    .footer,
+    button,
+    form,
+    .btn {
+        display: none !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        width: 100% !important;
+    }
+
+    body {
+        background: white !important;
+    }
+
+    .card {
+        box-shadow: none !important;
+        border: 1px solid #ddd !important;
+        break-inside: avoid;
+    }
+
+    .table-responsive {
+        overflow: visible !important;
+    }
+
+    table {
+        width: 100% !important;
+    }
+
+}
+
+</style>
+
+{% endblock %}
+```

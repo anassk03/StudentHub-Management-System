@@ -1,0 +1,23 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.log
+
+# Virtual environment
+.venv/
+venv/
+
+# Django database and private settings
+db.sqlite3
+.env
+.env.*
+
+# Uploaded files and generated static files
+media/
+staticfiles/
+
+# Editor settings
+.vscode/
+.idea/
+student_photos/

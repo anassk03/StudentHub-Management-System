@@ -1,0 +1,190 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Reports & Analytics | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid px-0">
+
+    <!-- PAGE HEADER -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">Reports & Analytics</h3>
+            <p class="text-muted mb-0">
+                Complete overview of students, finances and attendance.
+            </p>
+        </div>
+
+        <button type="button" class="btn btn-primary" onclick="window.print()">
+            <i class="fas fa-print me-2"></i>Print Report
+        </button>
+    </div>
+
+    <!-- STUDENT OVERVIEW -->
+    <h5 class="fw-bold mb-3">
+        <i class="fas fa-users text-primary me-2"></i>
+        Student Overview
+    </h5>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <p class="text-muted mb-2">Total Registered Students</p>
+                            <h2 class="fw-bold text-primary mb-1">
+                                {{ total_students|default:0 }}
+                            </h2>
+                            <small class="text-muted">All registered students</small>
+                        </div>
+
+                        <div class="text-primary fs-1">
+                            <i class="fas fa-user-graduate"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- FINANCIAL OVERVIEW -->
+    <h5 class="fw-bold mb-3">
+        <i class="fas fa-wallet text-success me-2"></i>
+        Financial Overview
+    </h5>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-2">Total Assigned Fees</p>
+                    <h3 class="fw-bold mb-1">
+                        ₹{{ total_fees|default:0|floatformat:2 }}
+                    </h3>
+                    <small class="text-muted">Total assigned fee amount</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-2">Total Fees Collected</p>
+                    <h3 class="fw-bold text-success mb-1">
+                        ₹{{ total_collected|default:0|floatformat:2 }}
+                    </h3>
+                    <small class="text-muted">Payments received</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-2">Outstanding Fees</p>
+                    <h3 class="fw-bold text-danger mb-1">
+                        ₹{{ outstanding_fees|default:0|floatformat:2 }}
+                    </h3>
+                    <small class="text-muted">Remaining fee balance</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ATTENDANCE OVERVIEW -->
+    <h5 class="fw-bold mb-3">
+        <i class="fas fa-calendar-check text-info me-2"></i>
+        Attendance Overview
+    </h5>
+
+    <div class="row g-3 mb-4">
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-2">Total Attendance Records</p>
+                    <h3 class="fw-bold text-info mb-1">
+                        {{ total_attendance|default:0 }}
+                    </h3>
+                    <small class="text-muted">All recorded attendance entries</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body p-4">
+                    <p class="text-muted mb-2">Overall Present Rate</p>
+
+                    <h3 class="fw-bold text-success mb-2">
+                        {{ attendance_percentage|default:0 }}%
+                    </h3>
+
+                    <div class="progress" role="progressbar"
+                         aria-label="Attendance percentage"
+                         aria-valuenow="{{ attendance_percentage|default:0 }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"
+                         style="height: 10px;">
+
+                        <div class="progress-bar bg-success"
+                             style="width: 0%;"
+                             data-percentage="{{ attendance_percentage|default:0 }}">
+                        </div>
+
+                    </div>
+
+                    <small class="text-muted mt-2 d-block">
+                        Present records out of all attendance records
+                    </small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- REPORT INFORMATION -->
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+            <h6 class="fw-bold mb-2">
+                <i class="fas fa-circle-info text-primary me-2"></i>
+                About These Reports
+            </h6>
+
+            <p class="text-muted mb-0">
+                These statistics are calculated from the student,
+                fee payment and attendance records currently stored
+                in the StudentHub database.
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<style>
+@media print {
+    .sidebar,
+    .topbar,
+    .footer,
+    button {
+        display: none !important;
+    }
+
+    .main-content {
+        margin: 0 !important;
+        width: 100% !important;
+    }
+
+    body {
+        background: #ffffff !important;
+    }
+}
+</style>
+
+{% endblock %}

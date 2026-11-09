@@ -1,0 +1,161 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}Student Profile | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="page-heading">
+    <div>
+        <h2>Student Profile</h2>
+        <p>Complete information about the registered student.</p>
+    </div>
+
+    <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-1"></i> Back
+    </a>
+</div>
+
+<!-- PROFILE CARD -->
+<div class="custom-card">
+
+    <div class="row align-items-center">
+
+        <div class="col-md-2 text-center mb-3 mb-md-0">
+
+            {% if student.profile_photo %}
+                <img src="{{ student.profile_photo.url }}"
+                     alt="Student Photo"
+                     class="rounded-circle"
+                     style="width:110px;height:110px;object-fit:cover;">
+            {% else %}
+                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center mx-auto"
+                     style="width:110px;height:110px;font-size:38px;">
+                    <i class="fas fa-user"></i>
+                </div>
+            {% endif %}
+
+        </div>
+
+        <div class="col-md-7">
+            <h3 class="fw-bold mb-1">{{ student.full_name }}</h3>
+
+            <p class="text-muted mb-2">
+                {{ student.student_id }}
+            </p>
+
+            <span class="badge bg-primary px-3 py-2">
+                {{ student.department }}
+            </span>
+
+            <span class="badge bg-success px-3 py-2">
+                {{ student.year }}
+            </span>
+        </div>
+
+        <div class="col-md-3 text-md-end mt-3 mt-md-0">
+
+            <a href="{% url 'edit_student' student.pk %}"
+               class="btn btn-outline-success mb-2">
+                <i class="fas fa-pen me-1"></i> Edit Profile
+            </a>
+
+            <br>
+
+            <a href="{% url 'delete_student' student.pk %}"
+               class="btn btn-outline-danger">
+                <i class="fas fa-trash me-1"></i> Delete
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- PERSONAL INFORMATION -->
+<div class="custom-card">
+
+    <h5 class="fw-bold mb-4">
+        <i class="fas fa-user text-primary me-2"></i>
+        Personal Information
+    </h5>
+
+    <div class="row g-4">
+
+        <div class="col-md-6">
+            <small class="text-muted">Full Name</small>
+            <h6 class="mt-1">{{ student.full_name }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Student ID</small>
+            <h6 class="mt-1">{{ student.student_id }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Email Address</small>
+            <h6 class="mt-1">{{ student.email }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Phone Number</small>
+            <h6 class="mt-1">{{ student.phone }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Gender</small>
+            <h6 class="mt-1">{{ student.gender }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Date of Birth</small>
+            <h6 class="mt-1">{{ student.date_of_birth|date:"d M Y" }}</h6>
+        </div>
+
+        <div class="col-12">
+            <small class="text-muted">Address</small>
+            <h6 class="mt-1">{{ student.address|linebreaksbr }}</h6>
+        </div>
+
+    </div>
+
+</div>
+
+<!-- ACADEMIC INFORMATION -->
+<div class="custom-card">
+
+    <h5 class="fw-bold mb-4">
+        <i class="fas fa-graduation-cap text-primary me-2"></i>
+        Academic Information
+    </h5>
+
+    <div class="row g-4">
+
+        <div class="col-md-4">
+            <small class="text-muted">Department</small>
+            <h6 class="mt-1">{{ student.department }}</h6>
+        </div>
+
+        <div class="col-md-4">
+            <small class="text-muted">Course</small>
+            <h6 class="mt-1">{{ student.course }}</h6>
+        </div>
+
+        <div class="col-md-4">
+            <small class="text-muted">Academic Year</small>
+            <h6 class="mt-1">{{ student.year }}</h6>
+        </div>
+
+        <div class="col-md-6">
+            <small class="text-muted">Registration Date</small>
+            <h6 class="mt-1">
+                {{ student.registration_date|date:"d M Y, h:i A" }}
+            </h6>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
