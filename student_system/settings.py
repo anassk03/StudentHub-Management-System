@@ -5,13 +5,17 @@ Django settings for Student Management System.
 
 from pathlib import Path
 import os
+import dj_database_url
 from dotenv import load_dotenv
 
 
-# Base directory
+# ==========================================
+# BASE DIRECTORY
+# ==========================================
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Load environment variables from .env
+# Load environment variables
 load_dotenv(BASE_DIR / '.env')
 
 
@@ -30,10 +34,14 @@ DEBUG = os.getenv(
     'DJANGO_DEBUG', 'False'
 ).lower() == 'true'
 
-ALLOWED_HOSTS = os.getenv(
-    'DJANGO_ALLOWED_HOSTS',
-    '127.0.0.1,localhost'
-).split(',')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv(
+        'DJANGO_ALLOWED_HOSTS',
+        '127.0.0.1,localhost'
+    ).split(',')
+    if host.strip()
+]
 
 
 # ==========================================
@@ -48,10 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Custom application
     'student_records',
 
-    # Crispy Forms
     'crispy_forms',
     'crispy_bootstrap5',
 ]
@@ -63,6 +69,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -71,6 +78,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
+# ==========================================
+# URL CONFIGURATION
+# ==========================================
 
 ROOT_URLCONF = 'student_system.urls'
 
@@ -96,6 +107,10 @@ TEMPLATES = [
 ]
 
 
+# ==========================================
+# WSGI APPLICATION
+# ==========================================
+
 WSGI_APPLICATION = 'student_system.wsgi.application'
 
 
@@ -103,12 +118,23 @@ WSGI_APPLICATION = 'student_system.wsgi.application'
 # DATABASE
 # ==========================================
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+DATABASE_URL = os.getenv('DATABASE_URL')
+
+if DATABASE_URL:
+    DATABASES = {
+        'default': dj_database_url.parse(
+            DATABASE_URL,
+            conn_max_age=600,
+            ssl_require=not DEBUG,
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # ==========================================
@@ -148,11 +174,22 @@ USE_TZ = True
 # STATIC FILES
 # ==========================================
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
+
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 
 # ==========================================
