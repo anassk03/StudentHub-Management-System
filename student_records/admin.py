@@ -1,6 +1,13 @@
 
 from django.contrib import admin
-from .models import Student, FeeRecord, FeePayment, Attendance, StudentMarks
+from .models import (
+    Student,
+    FeeRecord,
+    FeePayment,
+    Attendance,
+    StudentMarks,
+    StudentUserProfile,
+)
 
 
 @admin.register(Student)
@@ -112,3 +119,13 @@ class StudentMarksAdmin(admin.ModelAdmin):
     @admin.display(description='Result')
     def result_display(self, obj):
         return obj.result
+
+
+@admin.register(StudentUserProfile)
+class StudentUserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'student')
+    search_fields = (
+        'user__username',
+        'student__student_id',
+        'student__full_name',
+    )

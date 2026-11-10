@@ -5,12 +5,19 @@ from . import views
 
 urlpatterns = [
 
-    # DASHBOARD
+    # ADMIN DASHBOARD
     path('', views.dashboard, name='dashboard'),
 
     # AUTHENTICATION
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
+
+    # STUDENT DASHBOARD
+    path(
+        'student/dashboard/',
+        views.student_dashboard,
+        name='student_dashboard'
+    ),
 
     # STUDENT MANAGEMENT
     path('students/', views.student_list, name='student_list'),

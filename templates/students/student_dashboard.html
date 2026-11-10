@@ -1,0 +1,261 @@
+
+{% extends 'students/base.html' %}
+
+{% block title %}My Student Dashboard | StudentHub{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+    <!-- PAGE HEADING -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold">My Dashboard</h3>
+            <p class="text-muted">Welcome, {{ student.full_name }}!</p>
+        </div>
+        <span class="badge bg-primary">Student Portal</span>
+    </div>
+
+
+    <!-- STUDENT PROFILE -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-user-graduate me-2"></i>
+                My Profile
+            </h5>
+
+            <div class="row">
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Student ID</small>
+                    <h6>{{ student.student_id }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Full Name</small>
+                    <h6>{{ student.full_name }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Email</small>
+                    <h6>{{ student.email }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Phone</small>
+                    <h6>{{ student.phone }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Department</small>
+                    <h6>{{ student.department }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Course</small>
+                    <h6>{{ student.course }}</h6>
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <small class="text-muted">Year</small>
+                    <h6>{{ student.year }}</h6>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <!-- SUMMARY CARDS -->
+    <div class="row mb-4">
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted">Attendance</div>
+                    <h3 class="fw-bold text-primary mt-2">
+                        {{ attendance_percentage }}%
+                    </h3>
+                    <small class="text-muted">Overall attendance</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted">Subjects</div>
+                    <h3 class="fw-bold text-success mt-2">
+                        {{ marks_records|length }}
+                    </h3>
+                    <small class="text-muted">Available marks records</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="text-muted">Fee Records</div>
+                    <h3 class="fw-bold text-warning mt-2">
+                        {{ fee_records|length }}
+                    </h3>
+                    <small class="text-muted">Available fee records</small>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ATTENDANCE -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-calendar-check me-2"></i>
+                My Attendance
+            </h5>
+
+            {% if attendance_records %}
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for record in attendance_records %}
+                        <tr>
+                            <td>{{ record.date }}</td>
+                            <td>
+                                {% if record.status == 'Present' %}
+                                    <span class="badge bg-success">Present</span>
+                                {% else %}
+                                    <span class="badge bg-danger">{{ record.status }}</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+                <p class="text-muted mb-0">No attendance records available.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <!-- MARKS -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-graduation-cap me-2"></i>
+                My Marks and Results
+            </h5>
+
+            {% if marks_records %}
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Semester</th>
+                            <th>Total Marks</th>
+                            <th>Grade</th>
+                            <th>Result</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for mark in marks_records %}
+                        <tr>
+                            <td>{{ mark.subject_name }}</td>
+                            <td>{{ mark.semester }}</td>
+                            <td>{{ mark.total_marks }}</td>
+                            <td>{{ mark.grade }}</td>
+                            <td>{{ mark.result }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+                <p class="text-muted mb-0">No marks records available.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+
+    <!-- FEES -->
+    <div class="card shadow-sm border-0 mb-4">
+
+        <div class="card-body">
+
+            <h5 class="fw-bold mb-3">
+                <i class="fas fa-money-check-dollar me-2"></i>
+                My Fee Details
+            </h5>
+
+            {% if fee_records %}
+
+            <div class="table-responsive">
+                <table class="table table-hover">
+
+                    <thead>
+                        <tr>
+                            <th>Fee Name</th>
+                            <th>Academic Year</th>
+                            <th>Total Amount</th>
+                            <th>Paid</th>
+                            <th>Balance</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for fee in fee_records %}
+                        <tr>
+                            <td>{{ fee.fee_name }}</td>
+                            <td>{{ fee.academic_year }}</td>
+                            <td>₹{{ fee.total_amount }}</td>
+                            <td>₹{{ fee.amount_paid }}</td>
+                            <td>₹{{ fee.balance }}</td>
+                            <td>{{ fee.payment_status }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+
+            {% else %}
+                <p class="text-muted mb-0">No fee records available.</p>
+            {% endif %}
+
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

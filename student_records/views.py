@@ -1,5 +1,6 @@
 
 from decimal import Decimal
+from functools import wraps
 from datetime import date
 import csv
 
@@ -18,6 +19,7 @@ from .models import (
     FeePayment,
     Attendance,
     StudentMarks,
+    StudentUserProfile,
 )
 
 from .forms import (
@@ -30,13 +32,41 @@ from .forms import (
 
 
 # ==========================================
+# ADMIN ACCESS CONTROL
+# ==========================================
+
+def admin_required(view_func):
+    @wraps(view_func)
+    def wrapper(request, *args, **kwargs):
+
+        if not request.user.is_authenticated:
+            return redirect('login')
+
+        if not (request.user.is_staff or request.user.is_superuser):
+            return redirect('student_dashboard')
+
+        return view_func(request, *args, **kwargs)
+
+    return wrapper
+
+
+# ==========================================
 # LOGIN
 # ==========================================
 
 def login_view(request):
 
+    # Redirect users who are already logged in.
     if request.user.is_authenticated:
-        return redirect('dashboard')
+
+        if request.user.is_staff or request.user.is_superuser:
+            return redirect('dashboard')
+
+        if StudentUserProfile.objects.filter(user=request.user).exists():
+            return redirect('student_dashboard')
+
+        # Accounts without an Admin role or Student profile cannot use the portal.
+        logout(request)
 
     if request.method == 'POST':
 
@@ -50,12 +80,20 @@ def login_view(request):
         )
 
         if user is not None:
-            login(request, user)
-            return redirect('dashboard')
+
+            # Admin login
+            if user.is_staff or user.is_superuser:
+                login(request, user)
+                return redirect('dashboard')
+
+            # Student login
+            if StudentUserProfile.objects.filter(user=user).exists():
+                login(request, user)
+                return redirect('student_dashboard')
 
         messages.error(
             request,
-            'Invalid username or password.'
+            'Invalid username or password, or student account is not linked.'
         )
 
     return render(request, 'registration/login.html')
@@ -65,7 +103,7 @@ def login_view(request):
 # MAIN DASHBOARD
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def dashboard(request):
 
     students = Student.objects.all()
@@ -82,10 +120,65 @@ def dashboard(request):
 
 
 # ==========================================
-# STUDENT LIST
+# STUDENT DASHBOARD
 # ==========================================
 
 @login_required(login_url='login')
+def student_dashboard(request):
+
+    if request.user.is_staff or request.user.is_superuser:
+        return redirect('dashboard')
+
+    profile = get_object_or_404(
+        StudentUserProfile,
+        user=request.user
+    )
+
+    student = profile.student
+
+    attendance_records = Attendance.objects.filter(
+        student=student
+    )
+
+    marks_records = StudentMarks.objects.filter(
+        student=student
+    )
+
+    fee_records = FeeRecord.objects.filter(
+        student=student
+    )
+
+    total_days = attendance_records.count()
+
+    present_days = attendance_records.filter(
+        status='Present'
+    ).count()
+
+    attendance_percentage = (
+        round((present_days / total_days) * 100, 2)
+        if total_days else 0
+    )
+
+    context = {
+        'student': student,
+        'attendance_records': attendance_records,
+        'attendance_percentage': attendance_percentage,
+        'marks_records': marks_records,
+        'fee_records': fee_records,
+    }
+
+    return render(
+        request,
+        'students/student_dashboard.html',
+        context
+    )
+
+
+# ==========================================
+# STUDENT LIST
+# ==========================================
+
+@admin_required
 def student_list(request):
 
     query = request.GET.get('q', '')
@@ -112,7 +205,7 @@ def student_list(request):
 # ADD STUDENT
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def add_student(request):
 
     if request.method == 'POST':
@@ -137,7 +230,7 @@ def add_student(request):
 # STUDENT DETAILS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def student_detail(request, pk):
 
     student = get_object_or_404(Student, pk=pk)
@@ -153,7 +246,7 @@ def student_detail(request, pk):
 # EDIT STUDENT
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def edit_student(request, pk):
 
     student = get_object_or_404(Student, pk=pk)
@@ -188,7 +281,7 @@ def edit_student(request, pk):
 # DELETE STUDENT
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def delete_student(request, pk):
 
     student = get_object_or_404(Student, pk=pk)
@@ -209,7 +302,7 @@ def delete_student(request, pk):
 # FEES DASHBOARD
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def fee_dashboard(request):
 
     fee_records = FeeRecord.objects.select_related('student').all()
@@ -242,7 +335,7 @@ def fee_dashboard(request):
 # ASSIGN FEE
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def assign_fee(request):
 
     if request.method == 'POST':
@@ -263,7 +356,7 @@ def assign_fee(request):
 # RECORD PAYMENT
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def record_payment(request):
 
     if request.method == 'POST':
@@ -318,7 +411,7 @@ def record_payment(request):
 # FEE DETAILS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def fee_detail(request, pk):
 
     fee_record = get_object_or_404(
@@ -340,7 +433,7 @@ def fee_detail(request, pk):
 # PAYMENT HISTORY
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def payment_history(request):
 
     payments = FeePayment.objects.select_related(
@@ -367,7 +460,7 @@ def payment_history(request):
 # ATTENDANCE DASHBOARD
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def attendance_dashboard(request):
 
     selected_date = request.GET.get('date')
@@ -420,7 +513,7 @@ def attendance_dashboard(request):
 # MARK ATTENDANCE
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def mark_attendance(request):
 
     if request.method == 'POST':
@@ -447,7 +540,7 @@ def mark_attendance(request):
 # ALL ATTENDANCE RECORDS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def attendance_list(request):
 
     selected_date = request.GET.get('date')
@@ -487,7 +580,7 @@ def attendance_list(request):
 # INDIVIDUAL STUDENT ATTENDANCE HISTORY
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def student_attendance(request, pk):
 
     student = get_object_or_404(Student, pk=pk)
@@ -525,7 +618,7 @@ def student_attendance(request, pk):
 # REPORTS DASHBOARD
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def reports_dashboard(request):
 
     total_students = Student.objects.count()
@@ -569,7 +662,7 @@ def reports_dashboard(request):
 # STUDENT REPORTS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def student_reports(request):
 
     students = Student.objects.all().order_by('full_name')
@@ -621,7 +714,7 @@ def student_reports(request):
 # FEE REPORTS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def fee_reports(request):
 
     fee_records = FeeRecord.objects.select_related(
@@ -698,7 +791,7 @@ def fee_reports(request):
 # ATTENDANCE REPORTS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def attendance_reports(request):
 
     attendance_records = Attendance.objects.select_related('student').all()
@@ -752,7 +845,7 @@ def attendance_reports(request):
 # EXPORT STUDENT REPORT TO CSV
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def export_student_report(request):
 
     students = Student.objects.all().order_by('full_name')
@@ -804,7 +897,7 @@ def export_student_report(request):
 # EXPORT FEE REPORT TO CSV
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def export_fee_report(request):
 
     fee_records = FeeRecord.objects.select_related(
@@ -858,7 +951,7 @@ def export_fee_report(request):
 # EXPORT ATTENDANCE REPORT TO CSV
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def export_attendance_report(request):
 
     attendance_records = Attendance.objects.select_related('student').all()
@@ -909,7 +1002,7 @@ def export_attendance_report(request):
 # STUDENT MARKS DASHBOARD
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def marks_dashboard(request):
 
     marks_records = StudentMarks.objects.select_related('student').all()
@@ -947,7 +1040,7 @@ def marks_dashboard(request):
 # ADD STUDENT MARKS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def add_student_marks(request):
 
     if request.method == 'POST':
@@ -972,7 +1065,7 @@ def add_student_marks(request):
 # SEMESTER RESULTS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def semester_results(request):
 
     marks_records = StudentMarks.objects.select_related('student').all()
@@ -1045,7 +1138,7 @@ def semester_results(request):
 # PERFORMANCE ANALYSIS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def performance_analysis(request):
 
     marks_records = StudentMarks.objects.select_related('student').all()
@@ -1095,7 +1188,7 @@ def performance_analysis(request):
 # MARKS REPORTS
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def marks_reports(request):
 
     marks_records = StudentMarks.objects.select_related('student').all()
@@ -1148,7 +1241,7 @@ def marks_reports(request):
 # EXPORT MARKS REPORT TO CSV
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def export_marks_report(request):
 
     marks_records = StudentMarks.objects.select_related(
@@ -1241,7 +1334,7 @@ def export_marks_report(request):
 # INDIVIDUAL STUDENT MARKSHEET
 # ==========================================
 
-@login_required(login_url='login')
+@admin_required
 def student_marksheet(request, pk):
 
     student = get_object_or_404(Student, pk=pk)

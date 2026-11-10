@@ -344,3 +344,19 @@ class StudentMarks(models.Model):
                 name='unique_student_subject_marks'
             )
         ]
+
+# STUDENT LOGIN PROFILE
+class StudentUserProfile(models.Model):
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+
+    student = models.OneToOneField(
+        Student,
+        on_delete=models.CASCADE
+    )
+
+    def __str__(self):
+        return self.student.full_name
